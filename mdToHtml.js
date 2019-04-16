@@ -1,5 +1,5 @@
-const markdown = require( "markdown" ).markdown
 const fs = require('fs')
+const markdown = require( "markdown" ).markdown
 const path = require('path')
 
 const consoleError = (msg) => console.error('\x1b[31m%s\x1b[0m', msg)
@@ -56,7 +56,7 @@ function traverseYearDir(folderList) {
 /* Traverse the month directory */
 function traverseMonthDir(folderList) {
   const mdFiles = []
-  console.log(folderList)
+
   try {
     for (let i in folderList) {
       const fileList = fs.readdirSync(folderList[i])
@@ -84,12 +84,41 @@ function traverseMonthDir(folderList) {
 /* Generate the HTML file from the MD template */
 function generateHTML(fileList) {
   try {
+    const htmlString = readTemplate('template/post.html')
     for (let i in fileList) {
+      const outputNamePath = fileList[i].split('/')
       const fileData = fs.readFileSync(fileList[i], 'utf-8')    
-      console.log(markdown.toHTML(fileData))
+      const htmlData = markdown.toHTML(fileData)
+
+      let pageTitle = outputNamePath[outputNamePath.length - 1].slice(0, -3)
+      let outputData = htmlString
+      outputData = outputData.replace(`||blog-post||`, htmlData)
+      outputData = outputData.replace(`||title||`, pageTitle)
+
+      console.log(typeof(path.join(`public`, ...(outputNamePath.slice(1, outputNamePath.length - 1)))))
+      fs.mkdirSync((path.join(__dirname, `public`, ...(outputNamePath.slice(1, outputNamePath.length - 1)))),
+        { recursive: true }, 
+        (err) => {
+          consoleError(err)
+          throw (`Error in creating the directory`)
+        }
+      )
+
+      fs.writeFileSync(path.join(`public`, `${fileList[i].slice(3,-3)}.html`), outputData)
+      //console.log(outputData)
     }
   } catch (err) {
     consoleError(`ERROR in generateHTML`)
+    consoleError(`ERROR => ${err}`)
+  }
+}
+
+/* Read the html template file */
+function readTemplate(fileName) {
+  try {
+    return fs.readFileSync(fileName, 'utf-8')
+  } catch (err) {
+    consoleError(`ERROR in readTemplate`)
     consoleError(`ERROR => ${err}`)
   }
 }
