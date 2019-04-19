@@ -4,6 +4,7 @@
   "description": "Markdown to site generator",
   "main": "index.js",
   "scripts": {
+    "run": "node node_modules/http-server/bin/http-server -p 1235",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/rahulkadukar/markdown-to-site#readme",
   "devDependencies": {
+    "http-server": "^0.11.1",
     "markdown": "^0.5.0"
   }
 }
