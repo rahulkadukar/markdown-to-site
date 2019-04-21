@@ -1,4 +1,4 @@
-#### Markdown basics
+### Markdown basics
 
 This is just a sample page to check if **Markdown** works.
 
@@ -10,3 +10,9 @@ This is just a sample page to check if **Markdown** works.
     return 0;
   }
 ```
+
+```python
+  print("Hello world")
+```
+
+\\( ax^2 + \sqrt{bx} + c = 0 \\)

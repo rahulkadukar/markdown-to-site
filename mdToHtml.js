@@ -85,6 +85,7 @@ function traverseMonthDir(folderList) {
 function generateHTML(fileList) {
   try {
     const htmlString = readTemplate('template/post.html')
+
     for (let i in fileList) {
       const outputNamePath = fileList[i].split('/')
       const fileData = fs.readFileSync(fileList[i], 'utf-8')    
@@ -104,7 +105,11 @@ function generateHTML(fileList) {
       )
 
       fs.writeFileSync(path.join(`public`, `${fileList[i].slice(9,-3)}.html`), outputData)
+      const fileWritten = path.join(`public`, `${fileList[i].slice(9,-3)}.html`)
+      console.log(`FILE WRITTEN => ${fileWritten}`)
     }
+
+    copyStaticFiles()
   } catch (err) {
     consoleError(`ERROR in generateHTML`)
     consoleError(`ERROR => ${err}`)
@@ -119,4 +124,21 @@ function readTemplate(fileName) {
     consoleError(`ERROR in readTemplate`)
     consoleError(`ERROR => ${err}`)
   }
+}
+
+/* Copy the static files */
+function copyStaticFiles() {
+  fs.mkdirSync((path.join(__dirname, `public`, `css`)),
+    { recursive: true }, 
+    (err) => {
+      consoleError(err)
+      throw (`Error in creating the CSS directory`)
+    }
+  )
+  // Copy the CSS files
+  fs.copyFile(`template/css/test-css.css`, `public/css/test-css.css`,
+    (err) => {
+      if (err) throw err;
+      console.log(`CSS copied over successfully`);
+  })
 }
