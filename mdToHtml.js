@@ -100,9 +100,19 @@ function generateHTML(fileList) {
 
       let pageTitle = outputNamePath[outputNamePath.length - 1].slice(0, -3)
       let outputData = htmlString
+
+      let breadCrumb = outputNamePath.slice(1, -1)
+      let breadCrumbElem = `<div class="breadcrumb">`
+      for (let x = 0; x < breadCrumb.length; ++x) {
+        let singleCrumb = `<div class="content">${breadCrumb[x]}</div><div class="arrow">`
+        + `<svg height="30" width="21"><polyline points="1 0, 21 12, 1 25, 0 25, 20 12, 0 0"/></svg></div>`
+        breadCrumbElem += singleCrumb
+      }
+      breadCrumbElem += `</div>`
+
       outputData = outputData.replace(`||blog-post||`, htmlData)
       outputData = outputData.replace(`||title||`, pageTitle)
-      outputData = outputData.replace(`||breadcrumb||`, `<div>2019 >> 04</div>`)
+      outputData = outputData.replace(`||breadcrumb||`, breadCrumbElem)
 
       fs.mkdirSync((path.join(__dirname, `public`, ...(outputNamePath.slice(1, outputNamePath.length - 1)))),
         { recursive: true }, 
@@ -117,7 +127,7 @@ function generateHTML(fileList) {
       console.log(`FILE WRITTEN => ${fileWritten}`)
     }
 
-    copyStaticFiles()
+    generateBlogList(fileList)
   } catch (err) {
     consoleError(`ERROR in generateHTML`)
     consoleError(`ERROR => ${err}`)
@@ -132,6 +142,23 @@ function readTemplate(fileName) {
     consoleError(`ERROR in readTemplate`)
     consoleError(`ERROR => ${err}`)
   }
+}
+
+/* Generate Blog list */
+function generateBlogList(fileList) {
+  const htmlString = readTemplate('template/list.html')
+  let postData = ''
+
+  for (let i in fileList) {
+    const outputNamePath = fileList[i].split('/')
+    postData += `<div><a href="${(outputNamePath.slice(1).join('/')).slice(0,-3)}.html">${outputNamePath.slice(-1)}</div>`
+  }
+
+  let outputData = htmlString
+  outputData = outputData.replace(`||blog-post||`, postData)
+
+  fs.writeFileSync(path.join(`public`, `index.html`), outputData)
+  copyStaticFiles();
 }
 
 /* Copy the static files */
