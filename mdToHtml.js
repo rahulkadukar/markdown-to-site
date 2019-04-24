@@ -1,6 +1,13 @@
 const fs = require('fs')
 const markdown = require('markdown-it')()
+  .use(require('markdown-it-sup'))
+  .use(require('markdown-it-footnote'))
 const path = require('path')
+
+markdown.renderer.rules.footnote_block_open = () => (
+  '<section class="footnotes">\n' +
+  '<ol class="footnotes-list">\n'
+);
 
 const consoleError = (msg) => console.error('\x1b[31m%s\x1b[0m', msg)
 
@@ -95,6 +102,7 @@ function generateHTML(fileList) {
       let outputData = htmlString
       outputData = outputData.replace(`||blog-post||`, htmlData)
       outputData = outputData.replace(`||title||`, pageTitle)
+      outputData = outputData.replace(`||breadcrumb||`, `<div>2019 >> 04</div>`)
 
       fs.mkdirSync((path.join(__dirname, `public`, ...(outputNamePath.slice(1, outputNamePath.length - 1)))),
         { recursive: true }, 
@@ -136,7 +144,7 @@ function copyStaticFiles() {
     }
   )
   // Copy the CSS files
-  fs.copyFile(`template/css/test-css.css`, `public/css/test-css.css`,
+  fs.copyFile(`template/css/blog-post.css`, `public/css/blog-post.css`,
     (err) => {
       if (err) throw err;
       console.log(`CSS copied over successfully`);

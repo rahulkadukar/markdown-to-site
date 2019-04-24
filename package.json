@@ -29,6 +29,8 @@
   "devDependencies": {
     "http-server": "^0.11.1",
     "markdown-it": "^8.4.2",
+    "markdown-it-footnote": "^3.0.1",
+    "markdown-it-sup": "^1.0.0",
     "nodemon": "^1.18.11"
   }
 }

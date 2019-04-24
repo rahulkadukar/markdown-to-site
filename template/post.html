@@ -5,22 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/agate.min.css" />
-  <link rel="stylesheet" href="../../css/test-css.css" />
+  <link rel="stylesheet" href="../../css/blog-post.css" />
   <title>||title||</title>
 </head>
 <body>
   <nav class="custom-navbar">
-    <ul>
-      <li>Home</li>
-      <li>About</li>
-      <li>Contact</li>
-    </ul>
+    <div class="left-navbar">
+      <span><a href="/">Home</a></span>
+      <span><a href="/about">About</a></li></span> 
+    </div>
   </nav>
+  <div class="breadcrumb">
+    ||breadcrumb||
+  </div>
   <div class="markdown-post">
     <div class="markdown-body">
       ||blog-post||
     </div>
   </div>
+  <div class="move-to-top" id="move-to-top">Top</div>
   <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
   <script type="text/javascript">
@@ -28,6 +31,14 @@
       document.querySelectorAll('pre code').forEach((block) => {
         hljs.highlightBlock(block);
       });
+
+      document.getElementById("move-to-top").addEventListener("click", jarscrollfunction);
+      function jarscrollfunction() {
+        var body = document.body; // For Safari
+        var html = document.documentElement; // Chrome, Firefox, IE and Opera 
+        body.scrollTop = 0; 
+        html.scrollTop = 0;
+      }
     });
   </script>
 </body>
