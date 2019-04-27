@@ -1,3 +1,9 @@
+---
+title: Hello World
+tags: "test"
+date: 2019-04-15
+---
+
 ### Markdown basics
 
 This is just a sample page to check if **Markdown** works.

@@ -1,4 +1,6 @@
+const assert = require('assert')
 const fs = require('fs')
+const yaml = require('js-yaml')
 const markdown = require('markdown-it')()
   .use(require('markdown-it-sup'))
   .use(require('markdown-it-footnote'))
@@ -10,6 +12,7 @@ markdown.renderer.rules.footnote_block_open = () => (
 );
 
 const consoleError = (msg) => console.error('\x1b[31m%s\x1b[0m', msg)
+const assertCheck = fnData => assert(fnData.errNo === 0, fnData.errMsg)
 
 const dirname = './markdown'
 
@@ -88,6 +91,41 @@ function traverseMonthDir(folderList) {
   }
 }
   
+function parseFile(fileData) {
+  const outData = {}
+  outData.errMsg = ''
+  outData.errNo = 0
+
+  //console.log(fileData)
+  const fileArray = fileData.contents.split(/\r\n|\r|\n/)
+
+  if (fileArray[0] !== `---`) {
+    outData.errNo = 1
+    outData.errMsg = `${fileData.fileName} file does not begin with YAML tag`
+    return outData
+  }
+
+  if (fileArray.length < 2) {
+    outData.errNo = 2
+    outData.errMsg = `Invalid file, does not contain any content`
+    return outData
+  }
+
+  let x;
+  for (x = 1; x < fileArray.length; ++x) {
+    if (fileArray[x] === `---`) break
+  }
+
+  if ((x + 2) >= fileArray.length) {
+    outData.errMsg = `Invalid file, does not contain markdown content`
+  }
+  
+  outData.metadata = yaml.safeLoad(fileArray.slice(1, x).join(`\n`))
+  outData.htmlData = fileArray.slice(x + 2).join('\n')
+  //console.log(outData)
+  return outData
+}
+
 /* Generate the HTML file from the MD template */
 function generateHTML(fileList) {
   try {
@@ -95,8 +133,15 @@ function generateHTML(fileList) {
 
     for (let i in fileList) {
       const outputNamePath = fileList[i].split('/')
-      const fileData = fs.readFileSync(fileList[i], 'utf-8')    
-      const htmlData = markdown.render(fileData)
+      const fileData = fs.readFileSync(fileList[i], 'utf-8')
+      const fileInfo = {}
+      fileInfo.fileName = fileList[i]
+      fileInfo.contents = fileData
+
+      const fileContents = parseFile(fileInfo)
+      assertCheck(fileContents)
+
+      const htmlData = markdown.render(fileContents.htmlData)
 
       let pageTitle = outputNamePath[outputNamePath.length - 1].slice(0, -3)
       let outputData = htmlString
