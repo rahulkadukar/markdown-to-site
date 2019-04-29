@@ -47,7 +47,7 @@ h6 { font-size: .75em; }
 
 .custom-navbar > .left-navbar > span {
   font-size: 20px;
-  padding: 12px;
+  padding: 12px 6px;
 }
 
 .custom-navbar a {
@@ -60,39 +60,112 @@ h6 { font-size: .75em; }
   width: 960px;
 }
 
-.breadcrumb {
-  margin-top: 30px;
-  margin-left: 10px;
-  margin-right: 10px;
+.move-to-top {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  padding: 20px;
+}
+
+div.markdown-title {
+  border-bottom: 1px solid rgb(234, 236, 239);
   display: flex;
   flex-direction: row;
-  background-color: #cccccc;
-  border: 1px solid black;
+  align-items: baseline;
+  font-weight: 600;
+  margin-bottom: 16px;
+  margin-top: 24px;
+  padding-bottom: 8px;
 }
 
-.breadcrumb div.content:first-of-type {
-  padding: 1px 20px;
+div.blog-post {
+  font-size: 1.5em;
+  font-weight: 600;
 }
 
-.breadcrumb div.content {
-  padding: 1px 20px;
-  height: 10px;
-  background-color: #cccccc;
+div.blog-date {
+  color: #777;
+  font-size: 1em;
+  font-weight: 400;
+  padding-left: 20px;
 }
 
-.breadcrumb div.arrow {
-  display: block;
-  height: 25px;
-  line-height: 0;
+div.card {
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+  padding: 20px 0px;
 }
 
-svg {
-  display: block;
+div.card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
 }
 
-.markdown-body {
+a.blog-title {
+  color: #444466;
+  font-size: 1.5em;
+  text-decoration: none;
+}
+
+a.blog-title:hover {
+  color: #0c58fa;
+}
+
+div.blog-summary {
+  margin: 5px 0px;
+}
+
+div.blog-tags {
+  display: flex;
+  flex-direction: row;
+  margin-left: -5px;
+}
+
+div.blog-tags > li {
+  margin: 5px;
+  list-style: none;
+}
+
+ul.breadcrumb {
+  margin-top: 30px;
+  margin-left: 6px;
+  margin-right: 6px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  list-style: none;
+}
+
+ul.breadcrumb li {
+  display: inline;
+}
+
+ul.breadcrumb li+li:before {
+  padding: 8px 4px;
+  color: black;
+  content: "/\00a0";
+}
+
+ul.breadcrumb li a {
+  color: #0c58fa;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+ul.breadcrumb li a:hover {
+  color: #013de4;
+  text-decoration: underline;
+}
+
+div.markdown-list {
   line-height: 1.5;
-  padding: 0px 12px;
+  padding: 30px 6px;
+}
+
+.markdown-body, .markdown-title {
+  line-height: 1.5;
+  padding: 0px 6px;
 }
 
 .markdown-body > h1, h2, h3, h4, h5, h6 {
@@ -113,13 +186,6 @@ svg {
 
 .markdown-body a {
   text-decoration: none;
-}
-
-.move-to-top {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  padding: 20px;
 }
 
 section.footnotes {
