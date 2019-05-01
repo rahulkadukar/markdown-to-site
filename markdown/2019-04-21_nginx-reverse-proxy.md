@@ -1,9 +1,11 @@
 ---
+date: 2019-04-25
 title: Nginx Reverse Proxy setup
+summary: A simple guide to setup nginx as a reverse proxy to serve multiple
+  sites from a single server
 tags: 
   - nginx
   - fedora
-date: 2019-04-25
 ---
 
 In computer networks, a reverse proxy is a type of proxy server that retrieves resources

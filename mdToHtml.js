@@ -1,5 +1,7 @@
 const assert = require('assert')
+const dateFormat = require('dateformat')
 const fs = require('fs')
+const fsExtra = require('fs-extra')
 const yaml = require('js-yaml')
 const markdown = require('markdown-it')()
   .use(require('markdown-it-sup'))
@@ -11,6 +13,7 @@ markdown.renderer.rules.footnote_block_open = () => (
   '<ol class="footnotes-list">\n'
 );
 
+const consoleAqua = msg => console.log('\x1b[36m%s\x1b[0m', msg)
 const consoleError = (msg) => console.error('\x1b[31m%s\x1b[0m', msg)
 const assertCheck = fnData => assert(fnData.errNo === 0, fnData.errMsg)
 
@@ -18,77 +21,24 @@ const dirname = './markdown'
 
 /* Read the directory contents*/
 try {
-  const files = fs.readdirSync(dirname)
-  const dirList = []
+  const fileList = fs.readdirSync(dirname)
+  const mdFiles = []
 
-  for (let i in files) {
-    const nodeName = path.join(dirname, files[i])
+  for (let j in fileList) {
+    const nodeName = path.join(dirname, fileList[j])
     const stats = fs.statSync(nodeName);
-    if (stats.isDirectory()) {
-      dirList.push(nodeName)
+    if (stats.isFile()) {
+      mdFiles.push(nodeName)
     }
   }
 
-  if (dirList.length !== 0) {
-    traverseYearDir(dirList)
+  if (mdFiles.length !== 0) {
+    fsExtra.emptyDirSync(`./public`)
+    generateHTML(mdFiles)
   }
 } catch (err) {
   consoleError(`ERROR in reading markdown folder`)
   consoleError(`ERROR => ${err}`)
-}
-
-/* Traverse the year directory */
-function traverseYearDir(folderList) {
-  const dirList = []
-
-  try {
-    for (let i in folderList) {
-      const fileList = fs.readdirSync(folderList[i])
-    
-      for (let j in fileList) {
-        const nodeName = path.join(folderList[i], fileList[j])
-        const stats = fs.statSync(nodeName);
-        if (stats.isDirectory()) {
-          dirList.push(nodeName)
-        }
-      }
-    
-      if (dirList.length !== 0) {
-        traverseMonthDir(dirList)
-      }
-    }
-  } catch (err) {
-    consoleError(`ERROR in traverseYearDir`)
-    consoleError(`ERROR => ${err}`)
-  }
-}
-
-/* Traverse the month directory */
-function traverseMonthDir(folderList) {
-  const mdFiles = []
-
-  try {
-    for (let i in folderList) {
-      const fileList = fs.readdirSync(folderList[i])
-    
-      for (let j in fileList) {
-        const nodeName = path.join(folderList[i], fileList[j])
-        const stats = fs.statSync(nodeName);
-        if (stats.isFile()) {
-          mdFiles.push(nodeName)
-        } else if (stats.isDirectory()) {
-          throw(`Unexpected directory found ${nodeName}`)  
-        }
-      }
-    
-      if (mdFiles.length !== 0) {
-        generateHTML(mdFiles)
-      }
-    }
-  } catch (err) {
-    consoleError(`ERROR in traverseMonthDir`)
-    consoleError(`ERROR => ${err}`)
-  }
 }
   
 function parseFile(fileData) {
@@ -96,7 +46,6 @@ function parseFile(fileData) {
   outData.errMsg = ''
   outData.errNo = 0
 
-  //console.log(fileData)
   const fileArray = fileData.contents.split(/\r\n|\r|\n/)
 
   if (fileArray[0] !== `---`) {
@@ -107,7 +56,7 @@ function parseFile(fileData) {
 
   if (fileArray.length < 2) {
     outData.errNo = 2
-    outData.errMsg = `Invalid file, does not contain any content`
+    outData.errMsg = `${fileData.fileName} Invalid file, does not contain any content`
     return outData
   }
 
@@ -117,18 +66,35 @@ function parseFile(fileData) {
   }
 
   if ((x + 2) >= fileArray.length) {
-    outData.errMsg = `Invalid file, does not contain markdown content`
+    outData.errNo = 3
+    outData.errMsg = `${fileData.fileName} Invalid file, does not contain markdown content`
   }
   
-  outData.metadata = yaml.safeLoad(fileArray.slice(1, x).join(`\n`))
+  const metadata = yaml.safeLoad(fileArray.slice(1, x).join(`\n`))
   outData.htmlData = fileArray.slice(x + 2).join('\n')
-  //console.log(outData)
+
+  const properties = [`title`, `date`, `summary`]
+  properties.forEach((e) => {
+    if (!metadata.hasOwnProperty(e)) {
+      outData.errNo = 4
+      outData.errMsg = `${fileData.fileName} YAML does not contain the ${e}`
+      return outData
+    }
+
+    if (e === `date`) {
+      metadata[`blogDate`] = dateFormat(new Date(metadata[e]), "fullDate")
+    }
+  })
+
+  //console.log(metadata)
+  outData.metadata = metadata
   return outData
 }
 
 /* Generate the HTML file from the MD template */
 function generateHTML(fileList) {
   try {
+    const blogList = []
     const htmlString = readTemplate('template/post.html')
 
     for (let i in fileList) {
@@ -143,23 +109,37 @@ function generateHTML(fileList) {
 
       const htmlData = markdown.render(fileContents.htmlData)
 
-      let pageTitle = outputNamePath[outputNamePath.length - 1].slice(0, -3)
+      const dateLong = `${dateFormat(fileContents.metadata.date, "yyyy-mm-dd")}`
+      const dateLongArray = dateLong.split(`-`)
+      const dirArray = dateLongArray.slice(0,2).concat(
+        fileList[i].split(path.sep)
+          .slice(-1)[0]
+          .split('_').slice(1)
+          .join('_').slice(0, -3)
+      )
+      
+      let breadCrumb = [`Home`].concat(dateLongArray.slice(0,2))
+      let breadCrumbElem = `<ul class="breadcrumb">`
+      let blogLink = `/`
+      for (let x = 0; x < breadCrumb.length; ++x) {
+        if (x > 0) {
+          blogLink += breadCrumb[x] + `/`
+        }
+        let singleCrumb = `<li><a href="${blogLink}">${breadCrumb[x]}</a></li>`
+        breadCrumbElem += singleCrumb
+        
+      }
+      breadCrumbElem += `</ul>`
+
       let outputData = htmlString
 
-      let breadCrumb = outputNamePath.slice(1, -1)
-      let breadCrumbElem = `<div class="breadcrumb">`
-      for (let x = 0; x < breadCrumb.length; ++x) {
-        let singleCrumb = `<div class="content">${breadCrumb[x]}</div><div class="arrow">`
-        + `<svg height="30" width="21"><polyline points="1 0, 21 12, 1 25, 0 25, 20 12, 0 0"/></svg></div>`
-        breadCrumbElem += singleCrumb
-      }
-      breadCrumbElem += `</div>`
-
-      outputData = outputData.replace(`||blog-post||`, htmlData)
-      outputData = outputData.replace(`||title||`, pageTitle)
+      outputData = outputData.replace(`||title||`, fileContents.metadata.title)
       outputData = outputData.replace(`||breadcrumb||`, breadCrumbElem)
-
-      fs.mkdirSync((path.join(__dirname, `public`, ...(outputNamePath.slice(1, outputNamePath.length - 1)))),
+      outputData = outputData.replace(`||blog-title||`, fileContents.metadata.title)
+      outputData = outputData.replace(`||blog-date||`, fileContents.metadata.blogDate)
+      outputData = outputData.replace(`||blog-post||`, htmlData)
+      
+      fs.mkdirSync((path.join(__dirname, `public`, ...(dirArray))),
         { recursive: true }, 
         (err) => {
           consoleError(err)
@@ -167,15 +147,20 @@ function generateHTML(fileList) {
         }
       )
 
-      fs.writeFileSync(path.join(`public`, `${fileList[i].slice(9,-3)}.html`), outputData)
-      const fileWritten = path.join(`public`, `${fileList[i].slice(9,-3)}.html`)
-      console.log(`FILE WRITTEN => ${fileWritten}`)
+      const outputFileName = path.join(`public`, ...(dirArray) ,`index.html`)
+      fs.writeFileSync(outputFileName, outputData)
+
+      const blogData = {}
+      blogData.metadata = fileContents.metadata
+      blogData.location = dirArray
+      blogList.push(blogData)
+      consoleAqua(`FILE WRITTEN => ${outputFileName}`)
     }
 
-    generateBlogList(fileList)
+    generateBlogList(blogList)
   } catch (err) {
     consoleError(`ERROR in generateHTML`)
-    consoleError(`ERROR => ${err}`)
+    consoleError(`ERROR => ${err.stack}`)
   }
 }
 
@@ -185,25 +170,90 @@ function readTemplate(fileName) {
     return fs.readFileSync(fileName, 'utf-8')
   } catch (err) {
     consoleError(`ERROR in readTemplate`)
-    consoleError(`ERROR => ${err}`)
+    consoleError(`ERROR => ${err.stack}`)
   }
 }
 
 /* Generate Blog list */
-function generateBlogList(fileList) {
+function generateBlogList(fileListData) {
   const htmlString = readTemplate('template/list.html')
   let postData = ''
 
+  const fileList = fileListData.sort((a, b) => {
+    if (a.metadata.date > b.metadata.date)
+      return -1
+    else
+      return 1
+  })
+
   for (let i in fileList) {
-    const outputNamePath = fileList[i].split('/')
-    postData += `<div><a href="${(outputNamePath.slice(1).join('/')).slice(0,-3)}.html">${outputNamePath.slice(-1)}</div>`
+    const outputNamePath = path.join(path.sep, ...(fileList[i].location), `index.html`)
+    let tagList = ''
+    fileList[i].metadata.tags.forEach((e) => { tagList += `<li>${e}</li>` })
+    postData += `<div class="card">` + `<div class="card-header">` + 
+      `<a class="blog-title" href="${outputNamePath}">${fileList[i].metadata.title}</a>` +
+      `<div class="blog-date"><p>${fileList[i].metadata.blogDate}</p></div>` + `</div>` +
+      `<div class="blog-summary"><p>${fileList[i].metadata.summary}</p></div>` + 
+      `</div>`
   }
 
   let outputData = htmlString
   outputData = outputData.replace(`||blog-post||`, postData)
 
   fs.writeFileSync(path.join(`public`, `index.html`), outputData)
-  copyStaticFiles();
+
+  generateDateBlogList(fileList)
+  copyStaticFiles()
+}
+
+/* Generate the pages */
+function writeDataBlogList(arrayData, dateType) {
+  for (let y in arrayData) {
+    const htmlString = readTemplate('template/list.html')
+    const fileList = arrayData[y]
+    let postData = ''
+
+    for (let i in fileList) {
+      const outputNamePath = path.join(path.sep, ...(fileList[i].location), `index.html`)
+      let tagList = ''
+      fileList[i].metadata.tags.forEach((e) => { tagList += `<li>${e}</li>` })
+      postData += `<div class="card">` + `<div class="card-header">` + 
+        `<a class="blog-title" href="${outputNamePath}">${fileList[i].metadata.title}</a>` +
+        `<div class="blog-date"><p>${fileList[i].metadata.blogDate}</p></div>` + `</div>` +
+        `<div class="blog-summary"><p>${fileList[i].metadata.summary}</p></div>` + 
+        `</div>`
+    }
+
+    let outputData = htmlString
+    outputData = outputData.replace(`||blog-post||`, postData)
+
+    if (dateType === `year`)
+      fs.writeFileSync(path.join(`public`, y , `index.html`), outputData)
+    else
+      fs.writeFileSync(path.join(`public`, path.join(...(y.split(`-`))) , `index.html`), outputData)
+  }
+}
+/* Generate the navigation pages by year and month */
+function generateDateBlogList(fileListData) {
+  const yearData = {}
+  const monthData = {}
+
+  fileListData.forEach((e) => {
+    let monthIndex = `${e.location[0]}-${e.location[1]}`
+    if (!(yearData.hasOwnProperty(e.location[0]))) {
+      yearData[e.location[0]] = []
+    }
+
+    if (!(monthData.hasOwnProperty(monthIndex))) {
+      monthData[monthIndex] = []
+    }
+
+    yearData[e.location[0]].push(e)
+    monthData[monthIndex].push(e)
+  })
+
+  writeDataBlogList(yearData, `year`)
+  writeDataBlogList(monthData, `month`)
 }
 
 /* Copy the static files */
@@ -220,5 +270,11 @@ function copyStaticFiles() {
     (err) => {
       if (err) throw err;
       console.log(`CSS copied over successfully`);
+  })
+
+  fs.copyFile(`favicon.ico`, `public/favicon.ico`,
+    (err) => {
+      if (err) throw err;
+      console.log(`Icon copied over successfully`);
   })
 }
