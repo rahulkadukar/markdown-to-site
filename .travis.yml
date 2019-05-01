@@ -1,6 +1,9 @@
 language: node_js
 node_js:
   - "10"
-script: echo "npm test temporarily disabled"
 install:
   npm install
+script:
+  - echo "npm test temporarily disabled"
+  - npm ./mdToHTML.js
+  - ls -l public/
