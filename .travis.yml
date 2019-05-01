@@ -5,5 +5,5 @@ install:
   npm install
 script:
   - echo "npm test temporarily disabled"
-  - npm ./mdToHTML.js
+  - node ./mdToHTML.js
   - ls -l public/
