@@ -7,3 +7,4 @@ script:
   - echo "npm test temporarily disabled"
   - node ./mdToHtml.js
   - ls -l public/
+  - printenv
