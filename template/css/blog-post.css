@@ -91,9 +91,12 @@ div.blog-date {
 }
 
 div.card {
-  border-top: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 2px solid #dddddd;
   padding: 20px 0px;
+}
+
+div.card:last-child{
+  border-bottom: 0px;
 }
 
 div.card-header {
