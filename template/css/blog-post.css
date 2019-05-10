@@ -150,13 +150,13 @@ ul.breadcrumb li+li:before {
   content: "/\00a0";
 }
 
-ul.breadcrumb li a {
+ul.breadcrumb li a, div.page-footer a {
   color: #0c58fa;
   font-weight: 600;
   text-decoration: none;
 }
 
-ul.breadcrumb li a:hover {
+ul.breadcrumb li a:hover. div.page-footer a:hover {
   color: #013de4;
   text-decoration: underline;
 }
@@ -166,9 +166,31 @@ div.markdown-list {
   padding: 30px 6px;
 }
 
-.markdown-body, .markdown-title {
+.markdown-body, .markdown-title, .page-footer {
   line-height: 1.5;
   padding: 0px 6px;
+}
+
+div.page-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px 6px;
+  padding-top: 40px;
+}
+
+div.page-footer a {
+  width: 100px;
+}
+
+div.page-footer p {
+  color: #777;
+  font-size: 1em;
+  font-weight: 400;
+}
+
+div.page-footer a:last-child {
+  text-align: right;
 }
 
 .markdown-body > h1, h2, h3, h4, h5, h6 {

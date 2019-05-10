@@ -82,11 +82,11 @@ function parseFile(fileData) {
     }
 
     if (e === `date`) {
+      metadata[e] = new Date(metadata[e]).getTime() + (12 * 3600 * 1000)
       metadata[`blogDate`] = dateFormat(new Date(metadata[e]), "fullDate")
     }
   })
 
-  //console.log(metadata)
   outData.metadata = metadata
   return outData
 }
@@ -97,8 +97,30 @@ function generateHTML(fileList) {
     const blogList = []
     const htmlString = readTemplate('template/post.html')
 
-    for (let i in fileList) {
-      const outputNamePath = fileList[i].split('/')
+    let prevPage = ``
+    let nextPage = ``
+    const fileListLength = fileList.length
+
+    for (let i = 0; i < fileListLength; ++i) {
+      const timeStart = process.hrtime()
+
+      if (i > 0) {
+        const fInfo = fileList[i - 1].split(path.sep).slice(-1)[0].split(`_`)
+        const fileNamePath = fInfo.slice(0,1)[0].split(`-`).slice(0,2).concat(fInfo.slice(1)[0].slice(0,-3))
+        prevPage = path.join(path.sep, ...(fileNamePath) ,`index.html`)
+      } else {
+        prevPage = ``
+      }
+
+      if (i < fileListLength - 1) {
+        const fInfo = fileList[i + 1].split(path.sep).slice(-1)[0].split(`_`)
+        const fileNamePath = fInfo.slice(0,1)[0].split(`-`).slice(0,2).concat(fInfo.slice(1)[0].slice(0,-3))
+        nextPage = path.join(path.sep, ...(fileNamePath) ,`index.html`)
+      } else {
+        nextPage = ``
+      }
+
+      let statData = ``
       const fileData = fs.readFileSync(fileList[i], 'utf-8')
       const fileInfo = {}
       fileInfo.fileName = fileList[i]
@@ -108,7 +130,6 @@ function generateHTML(fileList) {
       assertCheck(fileContents)
 
       const htmlData = markdown.render(fileContents.htmlData)
-
       const dateLong = `${dateFormat(fileContents.metadata.date, "yyyy-mm-dd")}`
       const dateLongArray = dateLong.split(`-`)
       const dirArray = dateLongArray.slice(0,2).concat(
@@ -148,6 +169,22 @@ function generateHTML(fileList) {
       )
 
       const outputFileName = path.join(`public`, ...(dirArray) ,`index.html`)
+      const timeEnd = process.hrtime(timeStart)
+
+      if (prevPage !== ``) {
+        statData = `<a href="${prevPage}">Prev</a>`
+      } else {
+        statData = `<a href="${prevPage}"></a>`
+      }
+      
+      statData += `<p>Page generated in ${timeEnd[0]}.${timeEnd[1].toString().slice(0,3)} seconds</p>`
+      
+      if (nextPage !== ``) {
+        statData += `<a href="${nextPage}">Next</a>`
+      } else {
+        statData += `<a href="${nextPage}"></a>`
+      }
+      outputData = outputData.replace(`||page-footer||`, statData)
       fs.writeFileSync(outputFileName, outputData)
 
       const blogData = {}
