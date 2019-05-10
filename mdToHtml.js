@@ -100,6 +100,7 @@ function generateHTML(fileList) {
     let prevPage = ``
     let nextPage = ``
     const fileListLength = fileList.length
+    fileList.reverse()
 
     for (let i = 0; i < fileListLength; ++i) {
       const timeStart = process.hrtime()
@@ -172,18 +173,19 @@ function generateHTML(fileList) {
       const timeEnd = process.hrtime(timeStart)
 
       if (prevPage !== ``) {
-        statData = `<a href="${prevPage}">Prev</a>`
+        statData = `<a id="prevPost" href="${prevPage}">Prev</a>`
       } else {
-        statData = `<a href="${prevPage}"></a>`
+        statData = `<a id="prevPost" href="${prevPage}"></a>`
       }
       
       statData += `<p>Page generated in ${timeEnd[0]}.${timeEnd[1].toString().slice(0,3)} seconds</p>`
       
       if (nextPage !== ``) {
-        statData += `<a href="${nextPage}">Next</a>`
+        statData += `<a id="nextPost" href="${nextPage}">Next</a>`
       } else {
-        statData += `<a href="${nextPage}"></a>`
+        statData += `<a id="nextPost" href="${nextPage}"></a>`
       }
+
       outputData = outputData.replace(`||page-footer||`, statData)
       fs.writeFileSync(outputFileName, outputData)
 

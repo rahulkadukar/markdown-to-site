@@ -38,13 +38,24 @@
         hljs.highlightBlock(block);
       });
 
-      document.getElementById("move-to-top").addEventListener("click", jarscrollfunction);
+      document.getElementById("move-to-top").addEventListener("click", jarscrollfunction)
       function jarscrollfunction() {
-        var body = document.body; // For Safari
-        var html = document.documentElement; // Chrome, Firefox, IE and Opera 
-        body.scrollTop = 0; 
-        html.scrollTop = 0;
+        const body = document.body // For Safari
+        const html = document.documentElement // Chrome, Firefox, IE and Opera 
+        body.scrollTop = 0 
+        html.scrollTop = 0
       }
+
+      document.querySelector(`body`).onkeyup = handleKey
+      function handleKey(e) {
+        if (e.key === `n` || e.key === 'N') {
+          document.getElementById(`nextPost`).click()
+        }
+
+        if (e.key === `p` || e.key === 'P') {
+          document.getElementById(`prevPost`).click()
+        }
+      } 
     });
   </script>
 </body>
