@@ -178,7 +178,7 @@ function generateHTML(fileList) {
         statData = `<a id="prevPost" href="${prevPage}"></a>`
       }
       
-      statData += `<p>Page generated in ${timeEnd[0]}.${timeEnd[1].toString().slice(0,3)} seconds</p>`
+      statData += `<p>Page generated in ${((timeEnd[0] * 1e9 + timeEnd[1]) / 1e6).toString().substr(0,5)} ms</p>`
       
       if (nextPage !== ``) {
         statData += `<a id="nextPost" href="${nextPage}">Next</a>`
@@ -216,6 +216,7 @@ function readTemplate(fileName) {
 /* Generate Blog list */
 function generateBlogList(fileListData) {
   const htmlString = readTemplate('template/list.html')
+  const timeStart = process.hrtime()
   let postData = ''
 
   const fileList = fileListData.sort((a, b) => {
@@ -239,6 +240,10 @@ function generateBlogList(fileListData) {
   let outputData = htmlString
   outputData = outputData.replace(`||blog-post||`, postData)
 
+  const timeEnd = process.hrtime(timeStart)
+  const statData = `<div>&nbsp;</div><p>Page generated in ${((timeEnd[0] * 1e9 + timeEnd[1]) / 1e6).toString().substr(0,5)} ms</p><div>&nbsp;</div>`
+  outputData = outputData.replace(`||page-footer||`, statData)
+
   fs.writeFileSync(path.join(`public`, `index.html`), outputData)
 
   generateDateBlogList(fileList)
@@ -248,6 +253,7 @@ function generateBlogList(fileListData) {
 /* Generate the pages */
 function writeDataBlogList(arrayData, dateType) {
   for (let y in arrayData) {
+    const timeStart = process.hrtime()
     const htmlString = readTemplate('template/list.html')
     const fileList = arrayData[y]
     let postData = ''
@@ -265,6 +271,10 @@ function writeDataBlogList(arrayData, dateType) {
 
     let outputData = htmlString
     outputData = outputData.replace(`||blog-post||`, postData)
+
+    const timeEnd = process.hrtime(timeStart)
+    const statData = `<div>&nbsp;</div><p>Page generated in ${((timeEnd[0] * 1e9 + timeEnd[1]) / 1e6).toString().substr(0,5)} ms</p><div>&nbsp;</div>`
+    outputData = outputData.replace(`||page-footer||`, statData)
 
     if (dateType === `year`)
       fs.writeFileSync(path.join(`public`, y , `index.html`), outputData)
