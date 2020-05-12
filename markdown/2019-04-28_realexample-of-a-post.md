@@ -8,7 +8,7 @@ tags:
 
 ### Markdown basics
 
-This is just a sample page to check if **Markdown** works.
+This is just a sample page to check if **Markdown** works. Ma boi Bide
 
 ```cpp
   #include <stdio.h>
