@@ -4,7 +4,8 @@
   "description": "Markdown to site generator",
   "main": "index.js",
   "scripts": {
-    "build": "nodemon node_modules/nodemon/bin/nodemon.js ./mdToHtml.js",
+    "build": "node mdToHtml.js",
+    "dev": "nodemon node_modules/nodemon/bin/nodemon.js ./mdToHtml.js",
     "run": "node node_modules/http-server/bin/http-server -p 1235",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
