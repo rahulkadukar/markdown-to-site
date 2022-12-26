@@ -128,5 +128,13 @@ are used to setup certbot with nginx. Running the commands below will overwrite 
   certbot --nginx
 ```
 
+#### Wildcard certbot
+
+```sh
+  certbot certonly --manual --manual-public-ip-logging-ok \
+    --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory  \
+    -d *.ebrk.dev
+```
+
 #### References
 [^first]: ["Forward and reverse proxies".](http://httpd.apache.org/docs/current/mod/mod_proxy.html) The Apache Software Foundation.
